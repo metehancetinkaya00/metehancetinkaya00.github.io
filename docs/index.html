@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Metehan Çetinkaya</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' }
+  </script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    (function () {
+      const saved = localStorage.getItem("theme");
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      if (saved === "dark" || (!saved && prefersDark)) document.documentElement.classList.add("dark");
+    })();
+  </script>
+
+  <style>
+    html { scroll-behavior: smooth; }
+    body { transition: background-color 320ms ease, color 320ms ease; }
+
+    .bgfx {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: radial-gradient(1200px 800px at 20% 20%, rgba(59,130,246,.18), rgba(0,0,0,0) 60%),
+                  radial-gradient(1000px 700px at 80% 30%, rgba(236,72,153,.14), rgba(0,0,0,0) 55%),
+                  radial-gradient(900px 700px at 60% 80%, rgba(34,197,94,.10), rgba(0,0,0,0) 55%),
+                  linear-gradient(135deg, rgba(2,6,23,1), rgba(17,24,39,1));
+    }
+
+    .navlink { position: relative; transition: color 200ms ease; }
+    .navlink::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -6px;
+      height: 2px;
+      width: 100%;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 250ms ease;
+      background: currentColor;
+      opacity: .65;
+    }
+    .navlink:hover::after { transform: scaleX(1); }
+
+    @keyframes introTitle {
+      from { opacity: 0; transform: translateY(14px); filter: blur(6px); }
+      to { opacity: 1; transform: translateY(0); filter: blur(0); }
+    }
+    @keyframes introSub {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes introBar {
+      from { transform: translateX(-100%); }
+      to { transform: translateX(0%); }
+    }
+    @keyframes floaty {
+      0% { transform: translateY(0px) translateX(0px) scale(1); }
+      50% { transform: translateY(-10px) translateX(6px) scale(1.02); }
+      100% { transform: translateY(0px) translateX(0px) scale(1); }
+    }
+    @keyframes shimmer {
+      0% { transform: translateX(-140%); }
+      100% { transform: translateX(140%); }
+    }
+
+    .intro-hide {
+      opacity: 0;
+      transform: scale(1.02);
+      pointer-events: none;
+      transition: opacity 650ms cubic-bezier(.16,1,.3,1), transform 650ms cubic-bezier(.16,1,.3,1);
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      filter: blur(10px);
+      transition:
+        opacity 750ms cubic-bezier(.16,1,.3,1),
+        transform 750ms cubic-bezier(.16,1,.3,1),
+        filter 750ms cubic-bezier(.16,1,.3,1);
+      will-change: opacity, transform, filter;
+    }
+    .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+
+    .hover-lift { transition: transform 250ms ease, box-shadow 250ms ease, border-color 250ms ease; }
+    .hover-lift:hover { transform: translateY(-4px); box-shadow: 0 18px 45px rgba(0,0,0,.14); }
+
+    .glass {
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .dark .glass { background: rgba(17,24,39,0.72); }
+
+    .badge-ads {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.08);
+    }
+    .badge-ads::before {
+      content: "";
+      position: absolute;
+      top: -40%;
+      left: -60%;
+      width: 60%;
+      height: 180%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+      transform: translateX(-140%);
+      animation: shimmer 2.4s linear infinite;
+    }
+
+    .hero-orb {
+      position: absolute;
+      border-radius: 9999px;
+      filter: blur(26px);
+      opacity: .5;
+      animation: floaty 6s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .media-wrap { position: relative; overflow: hidden; }
+    .media-pane {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transform: scale(1.01);
+      filter: blur(6px);
+      pointer-events: none;
+      transition: opacity 260ms ease, transform 260ms ease, filter 260ms ease;
+    }
+    .media-pane.is-active {
+      opacity: 1;
+      transform: scale(1);
+      filter: blur(0);
+      pointer-events: auto;
+    }
+    .media-tabs {
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      display: flex;
+      gap: 8px;
+      z-index: 2;
+    }
+    .media-tab {
+      border: 1px solid rgba(255,255,255,0.22);
+      background: rgba(0,0,0,0.42);
+      color: rgba(255,255,255,0.92);
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+    }
+    .media-tab:hover { transform: translateY(-1px); }
+    .media-tab.is-active {
+      background: rgba(37,99,235,0.55);
+      border-color: rgba(96,165,250,0.55);
+    }
+
+    .thumbs {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      z-index: 1;
+      scrollbar-width: thin;
+    }
+    .thumbs::-webkit-scrollbar { height: 6px; }
+    .thumbs::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.22); border-radius: 999px; }
+
+    .thumbbtn {
+      border: 1px solid rgba(255,255,255,0.22);
+      background: rgba(0,0,0,0.35);
+      border-radius: 12px;
+      overflow: hidden;
+      flex: 0 0 auto;
+      transition: transform 160ms ease, border-color 160ms ease;
+    }
+    .thumbbtn:hover { transform: translateY(-1px); }
+    .thumbbtn.is-active { border-color: rgba(96,165,250,0.75); }
+
+    .phone-shell {
+      position: relative;
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+      box-shadow: 0 18px 50px rgba(0,0,0,.22);
+      overflow: hidden;
+    }
+    .dark .phone-shell { border-color: rgba(255,255,255,0.10); }
+    .phone-notch {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 42%;
+      height: 16px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.28);
+      border: 1px solid rgba(255,255,255,0.10);
+      z-index: 2;
+      pointer-events: none;
+    }
+    .dark .phone-notch { background: rgba(0,0,0,0.42); }
+    .phone-glow {
+      position: absolute;
+      inset: -30%;
+      background:
+        radial-gradient(420px 240px at 25% 30%, rgba(59,130,246,.22), rgba(0,0,0,0) 60%),
+        radial-gradient(360px 220px at 75% 40%, rgba(236,72,153,.16), rgba(0,0,0,0) 60%),
+        radial-gradient(320px 240px at 55% 80%, rgba(34,197,94,.10), rgba(0,0,0,0) 60%);
+      filter: blur(18px);
+      opacity: .9;
+      pointer-events: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .reveal, * { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
+  <canvas id="bgFx" class="bgfx"></canvas>
+
+  <div id="intro" class="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-950 text-white">
+    <div class="text-center px-6">
+      <div class="text-4xl md:text-5xl font-extrabold tracking-tight" style="animation: introTitle 700ms cubic-bezier(.16,1,.3,1) both;">
+        Metehan Çetinkaya
+      </div>
+      <div class="mt-3 text-white/70 text-lg md:text-xl" style="animation: introSub 700ms cubic-bezier(.16,1,.3,1) 180ms both;">
+        Game Developer & Playable Ads Developer
+      </div>
+      <div class="mt-8 h-1 w-56 mx-auto rounded-full bg-white/15 overflow-hidden">
+        <div class="h-full w-full bg-white/60" style="animation: introBar 900ms cubic-bezier(.16,1,.3,1) 240ms both;"></div>
+      </div>
+    </div>
+  </div>
+
+  <header class="glass shadow-sm sticky top-0 z-50 transition-all border-b border-white/10 dark:border-white/10">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+      <h1 class="text-2xl font-bold">Metehan Çetinkaya</h1>
+
+      <nav class="flex items-center space-x-6">
+        <ul class="flex space-x-6">
+          <li><a href="#hero" class="navlink hover:text-blue-600">Home</a></li>
+          <li><a href="#about" class="navlink hover:text-blue-600">About</a></li>
+          <li><a href="#experience" class="navlink hover:text-blue-600">Experience</a></li>
+          <li><a href="#projects" class="navlink hover:text-blue-600">Projects</a></li>
+          <li><a href="#documents" class="navlink hover:text-blue-600">CV & Portfolio</a></li>
+          <li><a href="#playables" class="navlink hover:text-blue-600">Playables</a></li>
+          <li><a href="#videos" class="navlink hover:text-blue-600">Videos</a></li>
+          <li><a href="#education" class="navlink hover:text-blue-600">Certifications</a></li>
+          <li><a href="#contact" class="navlink hover:text-blue-600">Contact</a></li>
+
+          <li>
+            <a href="https://www.linkedin.com/in/metehancetinkaya00/" target="_blank" rel="noopener noreferrer" class="navlink hover:text-blue-600">
+              LinkedIn
+            </a>
+          </li>
+
+          <li>
+            <a href="https://github.com/metehancetinkaya00" target="_blank" rel="noopener noreferrer" class="navlink hover:text-blue-600">
+              GitHub
+            </a>
+          </li>
+
+          <li>
+            <a href="https://play.google.com/store/apps/developer?id=DollApp" target="_blank" rel="noopener noreferrer" class="navlink hover:text-blue-600">
+              Play Store
+            </a>
+          </li>
+
+          <li>
+            <a href="Metehan_Cetinkaya_CV.pdf" target="_blank" rel="noopener noreferrer" class="navlink font-medium hover:text-blue-600">
+              Download CV
+            </a>
+          </li>
+
+          <li>
+            <a href="Metehan_Cetinkaya_Portfolio.pdf" target="_blank" rel="noopener noreferrer" class="navlink font-medium hover:text-blue-600">
+              Download Portfolio
+            </a>
+          </li>
+        </ul>
+
+        <button id="themeToggle" class="ml-2 px-3 py-2 rounded-lg border border-gray-200/60 dark:border-white/10 hover:bg-gray-100/70 dark:hover:bg-white/10 transition-colors" aria-label="Toggle theme">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <section id="hero" class="relative overflow-hidden">
+    <div class="absolute inset-0">
+      <div class="hero-orb" style="width:420px;height:420px;left:-140px;top:40px;background:rgba(59,130,246,.28);animation-duration:7.2s"></div>
+      <div class="hero-orb" style="width:520px;height:520px;right:-200px;top:-120px;background:rgba(236,72,153,.22);animation-duration:8.4s"></div>
+      <div class="hero-orb" style="width:460px;height:460px;right:120px;bottom:-180px;background:rgba(34,197,94,.16);animation-duration:9.1s"></div>
+    </div>
+
+    <div class="relative">
+      <div class="h-[560px] bg-center bg-cover" style="background-image: url('hero.webp');">
+        <div class="absolute inset-0 bg-gradient-to-b from-black/70 via-black/55 to-black/80"></div>
+
+        <div class="relative container mx-auto px-4 h-full flex items-center">
+          <div class="max-w-3xl">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full badge-ads text-white reveal">
+              <i class="fa-solid fa-bolt"></i>
+              <span class="font-semibold">Playable Ads Developer</span>
+              <span class="text-white/70">Performance-first interactivity</span>
+            </div>
+
+            <h2 class="mt-5 text-4xl md:text-6xl font-extrabold text-white leading-tight reveal">
+              I build <span class="text-blue-400">interactive</span> demos that feel like real gameplay.
+            </h2>
+
+            <p class="mt-5 text-lg md:text-xl text-gray-200 leading-relaxed reveal">
+              Mobile games, playable ad production, rapid prototyping, and performance tuning for CTR/CPI outcomes.
+            </p>
+
+            <div class="mt-8 flex gap-4 flex-wrap reveal">
+              <a href="#playables" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                <i class="fa-solid fa-play"></i>
+                Slice Master Video
+              </a>
+              <a href="#projects" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-colors">
+                <i class="fa-solid fa-grid-2"></i>
+                Projects
+              </a>
+              <a href="https://www.linkedin.com/in/metehancetinkaya00/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-colors">
+                <i class="fa-brands fa-linkedin"></i>
+                LinkedIn
+              </a>
+              <a href="https://github.com/metehancetinkaya00" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-colors">
+                <i class="fa-brands fa-github"></i>
+                GitHub
+              </a>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="about" class="container mx-auto py-16 px-4">
+    <div class="bg-white/80 dark:bg-gray-900/60 border border-gray-200/60 dark:border-white/10 shadow-lg rounded-2xl p-6 md:p-8 reveal hover-lift backdrop-blur">
+      <h3 class="text-3xl font-bold mb-6">About Me</h3>
+
+      <div class="space-y-4 text-gray-700 dark:text-gray-300 leading-relaxed">
+        <p>
+          I’m Metehan Çetinkaya, a Game Developer and Playable Ads Developer focused on building interactive, performance-driven experiences.
+        </p>
+        <p>
+          I’ve been developing mobile game, web, and object-based projects for over four years, and I’ve been actively working on Playable Ads projects for over six months.
+        </p>
+        <p>
+          I uploaded my first game to the Play Store in 2021, and we’ve tested CPI and CTR for my projects with many gaming companies.
+        </p>
+      </div>
+
+      <div class="mt-8 grid gap-4 md:grid-cols-3">
+        <div class="rounded-xl border border-gray-200/70 dark:border-white/10 p-5 reveal hover-lift bg-white/50 dark:bg-white/5">
+          <h4 class="font-semibold text-lg">Playable Ads Stack</h4>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <span class="px-3 py-1 rounded-full text-sm border border-gray-200/70 dark:border-white/10 bg-white/60 dark:bg-white/5">Cocos Creator</span>
+            <span class="px-3 py-1 rounded-full text-sm border border-gray-200/70 dark:border-white/10 bg-white/60 dark:bg-white/5">TypeScript</span>
+            <span class="px-3 py-1 rounded-full text-sm border border-gray-200/70 dark:border-white/10 bg-white/60 dark:bg-white/5">WebGL</span>
+            <span class="px-3 py-1 rounded-full text-sm border border-gray-200/70 dark:border-white/10 bg-white/60 dark:bg-white/5">Asset Optimization</span>
+            <span class="px-3 py-1 rounded-full text-sm border border-gray-200/70 dark:border-white/10 bg-white/60 dark:bg-white/5">SDK Hooks</span>
+          </div>
+        </div>
+        <div class="rounded-xl border border-gray-200/70 dark:border-white/10 p-5 reveal hover-lift bg-white/50 dark:bg-white/5">
+          <h4 class="font-semibold text-lg">What I Optimize</h4>
+          <ul class="mt-3 space-y-2 text-gray-700 dark:text-gray-300">
+            <li class="flex items-center gap-2"><i class="fa-solid fa-gauge-high text-blue-600"></i><span>First frame time</span></li>
+            <li class="flex items-center gap-2"><i class="fa-solid fa-layer-group text-blue-600"></i><span>Draw calls & atlases</span></li>
+            <li class="flex items-center gap-2"><i class="fa-solid fa-cube text-blue-600"></i><span>Memory footprint</span></li>
+            <li class="flex items-center gap-2"><i class="fa-solid fa-hand-pointer text-blue-600"></i><span>Input feel & retention</span></li>
+          </ul>
+        </div>
+        <div class="rounded-xl border border-gray-200/70 dark:border-white/10 p-5 reveal hover-lift bg-white/50 dark:bg-white/5">
+          <h4 class="font-semibold text-lg">Languages</h4>
+          <ul class="mt-3 list-disc list-inside text-gray-700 dark:text-gray-300">
+            <li>Turkish (native)</li>
+            <li>English (professional)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="experience" class="container mx-auto py-16 px-4">
+    <div class="bg-white/80 dark:bg-gray-900/60 border border-gray-200/60 dark:border-white/10 shadow-lg rounded-2xl p-6 md:p-8 reveal hover-lift backdrop-blur">
+      <h3 class="text-3xl font-bold mb-8">Experience</h3>
+
+      <div class="mb-8 reveal">
+        <h4 class="text-xl font-semibold">INTERN GAME DEVELOPER</h4>
+        <p class="text-gray-600 dark:text-gray-300">Oreon Studios — Ankara | 07/2023 – 09/2023</p>
+        <ul class="mt-3 list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1">
+          <li>Interned as a Game Developer and focused heavily on algorithms.</li>
+          <li>Built two game prototypes during the internship.</li>
+        </ul>
+      </div>
+
+      <div class="mb-8 reveal">
+        <h4 class="text-xl font-semibold">INTERN PLAYABLE ADS DEVELOPER</h4>
+        <p class="text-gray-600 dark:text-gray-300">Oreon Studios — Ankara | 01/2025 – 03/2025</p>
+        <ul class="mt-3 list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1">
+          <li>Interned as a Playable Ads Developer using Cocos Creator.</li>
+          <li>Invited back for a second internship due to strong performance on previous projects.</li>
+          <li>Created playable ads for Slice Master (10M+ downloads).</li>
+        </ul>
+      </div>
+
+      <div class="reveal">
+        <h4 class="text-xl font-semibold">INTERN GAME DEVELOPER</h4>
+        <p class="text-gray-600 dark:text-gray-300">Gamegine — Ankara | 07/2025 – 09/2025</p>
+        <ul class="mt-3 list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1">
+          <li>Developed a ship based game with sailing and movement physics similar to Tortuga.</li>
+          <li>Implemented ship building mechanics, enemy PvP systems, map tracking, crew AI, and save systems.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="projects" class="container mx-auto py-16 px-4">
+    <div class="bg-white/80 dark:bg-gray-900/60 border border-gray-200/60 dark:border-white/10 shadow-lg rounded-2xl p-6 md:p-8 reveal hover-lift backdrop-blur">
+      <h3 class="text-3xl font-bold">Projects</h3>
+      <p class="mt-2 text-gray-600 dark:text-gray-300">Mobile • PC</p>
+
+      <div class="mt-10">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <h4 class="text-2xl font-bold">Mobile Projects</h4>
+          <span class="px-3 py-1 rounded-full text-xs font-semibold border border-gray-200/70 dark:border-white/10 bg-white/60 dark:bg-white/5">Multiple screenshots + video</span>
+        </div>
+
+        <div class="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <div class="rounded-2xl border border-gray-200/70 dark:border-white/10 overflow-hidden bg-white/50 dark:bg-white/5 hover-lift reveal" data-mediacard>
+            <div class="media-wrap aspect-video bg-black">
+              <div class="media-tabs">
+                <button class="media-tab is-active" data-media="img"><i class="fa-regular fa-image"></i>IMG</button>
+              </div>
+
+              <div class="media-pane is-active w-full h-full" data-pane="img" data-imgpane>
+                <img class="w-full h-full object-contain bg-black" data-mainimg src="screenshots/mobile/Busjam/busjam1.png" alt="Busjam">
+                <div class="thumbs">
+                  <button class="thumbbtn is-active" data-thumb="screenshots/mobile/Busjam/busjam1.png"><img class="w-16 h-10 object-cover" src="screenshots/mobile/Busjam/busjam1.png" alt=""></button>
+                  <button class="thumbbtn" data-thumb="screenshots/mobile/Busjam/busjam2.png"><img class="w-16 h-10 object-cover" src="screenshots/mobile/Busjam/busjam2.png" alt=""></button>
+                  <button class="thumbbtn" data-thumb="screenshots/mobile/Busjam/busjam3.png"><img class="w-16 h-10 object-cover" src="screenshots/mobile/Busjam/busjam3.png" alt=""></button>
+                </div>
+              </div>
+            </div>
+            <div class="p-5">
+              <h5 class="text-lg font-semibold">Busjam</h5>
+              <p class="mt-2 text-gray-600 dark:text-gray-300">Mobile project screenshots.</p>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border border-gray-200/70 dark:border-white/10 overflow-hidden bg-white/50 dark:bg-white/5 hover-lift reveal" data-mediacard>
+            <div class="media-wrap aspect-video bg-black">
+              <div class="media-tabs">
+                <button class="media-tab is-active" data-media="img"><i class="fa-regular fa-image"></i>IMG</button>
+                <button class="media-tab" data-media="vid"><i class="fa-solid fa-film"></i>VID</button>
+              </div>
+
+              <div class="media-pane is-active w-full h-full" data-pane="img" data-imgpane>
+                <img class="w-full h-full object-contain bg-black" data-mainimg src="screenshots/mobile/Hexasort/hexa1.png" alt="Hexasort">
+                <div class="thumbs">
+                  <button class="thumbbtn is-active" data-thumb="screenshots/mobile/Hexasort/hexa1.png"><img class="w-16 h-10 object-cover" src="screenshots/mobile/Hexasort/hexa1.png" alt=""></button>
+                  <button class="thumbbtn" data-thumb="screenshots/mobile/Hexasort/hexa2.png"><img class="w-16 h-10 object-cover" src="screenshots/mobile/Hexasort/hexa2.png" alt=""></button>
+                  <button class="thumbbtn" data-thumb="screenshots/mobile/Hexasort/hexa3.png"><img class="w-16 h-10 object-cover" src="screenshots/mobile/Hexasort/hexa3.png" alt=""></button>
+                </div>
+              </div>
+
+              <video class="media-pane w-full h-full object-cover" data-pane="vid" controls playsinline preload="metadata">
+                <source src="screenshots/mobile/Hexasort/video1.mp4" type="video/mp4">
+              </video>
+            </div>
+            <div class="p-5">
+              <h5 class="text-lg font-semibold">Hexasort</h5>
+              <p class="mt-2 text-gray-600 dark:text-gray-300">Mobile project screenshots + video.</p>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border border-gray-200/70 dark:border-white/10 overflow-hidden bg-white/50 dark:bg-white/5 hover-lift reveal" data-mediacard>
+            <div class="media-wrap aspect-video bg-black">
+              <div class="media-tabs">
+                <button class="media-tab is-active" data-media="img"><i class="fa-regular fa-image"></i>IMG</button>
+                <button class="media-tab" data-media="vid"><i class="fa-solid fa-film"></i>VID</button>
+              </div>
+
+              <div class="media-pane is-active w-full h-full" data-pane="img" data-imgpane>
+                <img class="w-full h-full object-contain bg-black" data-mainimg src="screenshots/mobile/Unblockjam/unblockjam1.png" alt="Unblockjam">
+                <div class="thumbs">
+                  <button class="thumbbtn is-active" data-thumb="screenshots/mobile/Unblockjam/unblockjam1.png"><img class="w-16 h-10 object-cover" src="screenshots/mobile/Unblockjam/unblockjam1.png" alt=""></button>
+                  <button class="thumbbtn" data-thumb="screenshots/mobile/Unblockjam/unblockjam2.png"><img class="w-16 h-10 object-cover" src="screenshots/mobile/Unblockjam/unblockjam2.png" alt=""></button>
+                  <button class="thumbbtn" data-thumb="screenshots/mobile/Unblockjam/unblockjam3.png"><img class="w-16 h-10 object-cover" src="screenshots/mobile/Unblockjam/unblockjam3.png" alt=""></button>
+                </div>
+              </div>
+
+              <video class="media-pane w-full h-full object-cover" data-pane="vid" controls playsinline preload="metadata">
+                <source src="screenshots/mobile/Unblockjam/video2.mp4" type="video/mp4">
+              </video>
+            </div>
+            <div class="p-5">
+              <h5 class="text-lg font-semibold">Unblockjam</h5>
+              <p class="mt-2 text-gray-600 dark:text-gray-300">Mobile project screenshots + video.</p>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border border-gray-200/70 dark:border-white/10 overflow-hidden bg-white/50 dark:bg-white/5 hover-lift reveal" data-mediacard>
+            <div class="media-wrap aspect-video bg-black">
+              <div class="media-tabs">
+                <button class="media-tab is-active" data-media="img"><i class="fa-regular fa-image"></i>IMG</button>
+                <button class="media-tab" data-media="vid"><i class="fa-solid fa-film"></i>VID</button>
+              </div>
+
+              <div class="media-pane is-active w-full h-full" data-pane="img" data-imgpane>
+                <img class="w-full h-full object-contain bg-black" data-mainimg src="screenshots/mobile/moonpioneer/moon1.png" alt="Moonpioneer">
+                <div class="thumbs">
+                  <button class="thumbbtn is-active" data-thumb="screenshots/mobile/moonpioneer/moon1.png"><img class="w-16 h-10 object-cover" src="screenshots/mobile/moonpioneer/moon1.png" alt=""></button>
+                  <button class="thumbbtn" data-thumb="screenshots/mobile/moonpioneer/moon2.png"><img class="w-16 h-10 object-cover" src="screenshots/mobile/moonpioneer/moon2.png" alt=""></button>
+                  <button class="thumbbtn" data-thumb="screenshots/mobile/moonpioneer/moon3.png"><img class="w-16 h-10 object-cover" src="screenshots/mobile/moonpioneer/moon3.png" alt=""></button>
+                </div>
+              </div>
+
+              <video class="media-pane w-full h-full object-cover" data-pane="vid" controls playsinline preload="metadata">
+                <source src="screenshots/mobile/moonpioneer/Video3.mp4" type="video/mp4">
+              </video>
+            </div>
+            <div class="p-5">
+              <h5 class="text-lg font-semibold">Moonpioneer</h5>
+              <p class="mt-2 text-gray-600 dark:text-gray-300">Mobile project screenshots + video.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-14">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <h4 class="text-2xl font-bold">PC Project</h4>
+          <span class="px-3 py-1 rounded-full text-xs font-semibold border border-gray-200/70 dark:border-white/10 bg-white/60 dark:bg-white/5">Screenshots</span>
+        </div>
+
+        <div class="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <div class="rounded-2xl border border-gray-200/70 dark:border-white/10 overflow-hidden bg-white/50 dark:bg-white/5 hover-lift reveal" data-mediacard>
+            <div class="media-wrap aspect-video bg-black">
+              <div class="media-tabs">
+                <button class="media-tab is-active" data-media="img"><i class="fa-regular fa-image"></i>IMG</button>
+              </div>
+
+              <div class="media-pane is-active w-full h-full" data-pane="img" data-imgpane>
+                <img class="w-full h-full object-contain bg-black" data-mainimg src="screenshots/pc/Ekran görüntüsü 2026-02-14 231401.png" alt="PC Prototype">
+                <div class="thumbs">
+                  <button class="thumbbtn is-active" data-thumb="screenshots/pc/Ekran görüntüsü 2026-02-14 231401.png"><img class="w-16 h-10 object-cover" src="screenshots/pc/Ekran görüntüsü 2026-02-14 231401.png" alt=""></button>
+                  <button class="thumbbtn" data-thumb="screenshots/pc/Ekran görüntüsü 2026-02-14 232101.png"><img class="w-16 h-10 object-cover" src="screenshots/pc/Ekran görüntüsü 2026-02-14 232101.png" alt=""></button>
+                  <button class="thumbbtn" data-thumb="screenshots/pc/Ekran görüntüsü 2026-02-14 232258.png"><img class="w-16 h-10 object-cover" src="screenshots/pc/Ekran görüntüsü 2026-02-14 232258.png" alt=""></button>
+                  <button class="thumbbtn" data-thumb="screenshots/pc/Ekran görüntüsü 2026-02-14 232440.png"><img class="w-16 h-10 object-cover" src="screenshots/pc/Ekran görüntüsü 2026-02-14 232440.png" alt=""></button>
+                  <button class="thumbbtn" data-thumb="screenshots/pc/Ekran görüntüsü 2026-02-14 232655.png"><img class="w-16 h-10 object-cover" src="screenshots/pc/Ekran görüntüsü 2026-02-14 232655.png" alt=""></button>
+                  <button class="thumbbtn" data-thumb="screenshots/pc/Ekran görüntüsü 2026-02-14 233128.png"><img class="w-16 h-10 object-cover" src="screenshots/pc/Ekran görüntüsü 2026-02-14 233128.png" alt=""></button>
+                </div>
+              </div>
+            </div>
+            <div class="p-5">
+              <h5 class="text-lg font-semibold">PC Game Prototype</h5>
+              <p class="mt-2 text-gray-600 dark:text-gray-300">Prototype screenshots.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="documents" class="container mx-auto py-16 px-4">
+    <div class="bg-white/80 dark:bg-gray-900/60 border border-gray-200/60 dark:border-white/10 shadow-lg rounded-2xl p-6 md:p-8 reveal hover-lift backdrop-blur">
+      <h3 class="text-3xl font-bold mb-4">CV & Portfolio</h3>
+      <p class="text-gray-600 dark:text-gray-300">
+        You can download the PDFs or view them directly on this page.
+      </p>
+
+      <div class="mt-8 grid gap-8 md:grid-cols-2">
+        <div class="rounded-2xl border border-gray-200/70 dark:border-white/10 overflow-hidden reveal hover-lift bg-white/50 dark:bg-white/5">
+          <div class="p-5 border-b border-gray-200/70 dark:border-white/10 flex items-center justify-between gap-3">
+            <h4 class="text-xl font-semibold">CV (PDF)</h4>
+            <a href="Metehan_Cetinkaya_CV.pdf" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-lg border border-gray-200/70 dark:border-white/10 hover:bg-gray-50/60 dark:hover:bg-white/10 transition-colors">
+              Download
+            </a>
+          </div>
+          <iframe class="w-full h-[520px] bg-white" src="Metehan_Cetinkaya_CV.pdf" title="Metehan Cetinkaya CV PDF"></iframe>
+        </div>
+
+        <div class="rounded-2xl border border-gray-200/70 dark:border-white/10 overflow-hidden reveal hover-lift bg-white/50 dark:bg-white/5">
+          <div class="p-5 border-b border-gray-200/70 dark:border-white/10 flex items-center justify-between gap-3">
+            <h4 class="text-xl font-semibold">Portfolio (PDF)</h4>
+            <a href="Metehan_Cetinkaya_Portfolio.pdf" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-lg border border-gray-200/70 dark:border-white/10 hover:bg-gray-50/60 dark:hover:bg-white/10 transition-colors">
+              Download
+            </a>
+          </div>
+          <iframe class="w-full h-[520px] bg-white" src="Metehan_Cetinkaya_Portfolio.pdf" title="Metehan Cetinkaya Portfolio PDF"></iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="playables" class="container mx-auto py-16 px-4">
+    <div class="bg-white/80 dark:bg-gray-900/60 border border-gray-200/60 dark:border-white/10 shadow-lg rounded-2xl p-6 md:p-8 reveal hover-lift backdrop-blur">
+      <div class="flex items-end justify-between gap-4 flex-wrap">
+        <div>
+          <h3 class="text-3xl font-bold">Playable Showcase</h3>
+          <p class="mt-2 text-gray-600 dark:text-gray-300">Slice Master — playable ad video (10M+ downloads title).</p>
+        </div>
+        <div class="px-4 py-2 rounded-xl border border-gray-200/70 dark:border-white/10 bg-white/60 dark:bg-white/5">
+          <span class="text-sm text-gray-600 dark:text-gray-300">Format:</span>
+          <span class="font-semibold">Mobile Portrait</span>
+        </div>
+      </div>
+
+      <div class="mt-8 grid gap-6 lg:grid-cols-2 items-start">
+        <div class="rounded-2xl border border-gray-200/70 dark:border-white/10 overflow-hidden bg-white/50 dark:bg-white/5">
+          <div class="p-5 border-b border-gray-200/70 dark:border-white/10">
+            <div class="flex items-center justify-between gap-3 flex-wrap">
+              <h4 class="text-xl font-semibold">Slice Master — Playable Ad (Video)</h4>
+              <span class="px-3 py-1 rounded-full text-xs font-semibold border border-gray-200/70 dark:border-white/10 bg-white/60 dark:bg-white/5">10M+ Downloads</span>
+            </div>
+            <p class="mt-2 text-gray-600 dark:text-gray-300">Video-only showcase.</p>
+          </div>
+          <div class="p-5">
+            <div class="mx-auto w-full max-w-[420px]">
+              <div class="phone-shell">
+                <div class="phone-glow"></div>
+                <div class="phone-notch"></div>
+                <div class="aspect-[9/16] bg-black">
+                  <video class="w-full h-full object-cover" controls playsinline preload="metadata">
+                    <source src="screenshots/playable/video4.mp4" type="video/mp4">
+                  </video>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-gray-200/70 dark:border-white/10 overflow-hidden bg-white/50 dark:bg-white/5">
+          <div class="p-5 border-b border-gray-200/70 dark:border-white/10">
+            <h4 class="text-xl font-semibold">Playable Highlights</h4>
+            <p class="mt-2 text-gray-600 dark:text-gray-300">What matters for ads: hook, feel, clarity, and CTA flow.</p>
+          </div>
+          <div class="p-5 grid gap-4 sm:grid-cols-2">
+            <div class="rounded-xl border border-gray-200/70 dark:border-white/10 p-4">
+              <div class="flex items-center gap-2 font-semibold">
+                <i class="fa-solid fa-stopwatch text-blue-600"></i>
+                Hook
+              </div>
+              <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">Immediate interaction, no dead time.</p>
+            </div>
+            <div class="rounded-xl border border-gray-200/70 dark:border-white/10 p-4">
+              <div class="flex items-center gap-2 font-semibold">
+                <i class="fa-solid fa-hand-pointer text-blue-600"></i>
+                Feel
+              </div>
+              <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">Responsive input tuned for mobile.</p>
+            </div>
+            <div class="rounded-xl border border-gray-200/70 dark:border-white/10 p-4">
+              <div class="flex items-center gap-2 font-semibold">
+                <i class="fa-solid fa-layer-group text-blue-600"></i>
+                Clarity
+              </div>
+              <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">Readable visuals and clean feedback.</p>
+            </div>
+            <div class="rounded-xl border border-gray-200/70 dark:border-white/10 p-4">
+              <div class="flex items-center gap-2 font-semibold">
+                <i class="fa-solid fa-bullseye text-blue-600"></i>
+                CTA Flow
+              </div>
+              <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">End-card designed to be frictionless.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="videos" class="container mx-auto py-16 px-4">
+    <div class="bg-white/80 dark:bg-gray-900/60 border border-gray-200/60 dark:border-white/10 shadow-lg rounded-2xl p-6 md:p-8 reveal hover-lift backdrop-blur">
+      <h3 class="text-3xl font-bold">Videos</h3>
+
+      <div class="mt-8 grid gap-6 md:grid-cols-2">
+        <div class="rounded-2xl border border-gray-200/70 dark:border-white/10 overflow-hidden reveal hover-lift bg-white/50 dark:bg-white/5">
+          <div class="aspect-video bg-black">
+            <video class="w-full h-full" controls preload="metadata" playsinline>
+              <source src="screenshots/mobile/Hexasort/video1.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-gray-200/70 dark:border-white/10 overflow-hidden reveal hover-lift bg-white/50 dark:bg-white/5">
+          <div class="aspect-video bg-black">
+            <video class="w-full h-full" controls preload="metadata" playsinline>
+              <source src="screenshots/mobile/Unblockjam/video2.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-gray-200/70 dark:border-white/10 overflow-hidden reveal hover-lift bg-white/50 dark:bg-white/5">
+          <div class="aspect-video bg-black">
+            <video class="w-full h-full" controls preload="metadata" playsinline>
+              <source src="screenshots/mobile/moonpioneer/Video3.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-gray-200/70 dark:border-white/10 overflow-hidden reveal hover-lift bg-white/50 dark:bg-white/5">
+          <div class="aspect-video bg-black">
+            <video class="w-full h-full" controls preload="metadata" playsinline>
+              <source src="screenshots/playable/video4.mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="education" class="container mx-auto py-16 px-4">
+    <div class="bg-white/80 dark:bg-gray-900/60 border border-gray-200/60 dark:border-white/10 shadow-lg rounded-2xl p-6 md:p-8 reveal hover-lift backdrop-blur">
+      <h3 class="text-3xl font-bold mb-6">Certifications</h3>
+
+      <div class="space-y-4">
+        <div class="rounded-xl border border-gray-200/70 dark:border-white/10 p-5 reveal hover-lift bg-white/50 dark:bg-white/5">
+          <h4 class="font-semibold text-lg">Stanford — Algorithms</h4>
+          <a class="text-blue-600 hover:underline break-all" href="https://coursera.org/share/774b8d596b9b0c665f806ab73837964e" target="_blank" rel="noopener noreferrer">
+            https://coursera.org/share/774b8d596b9b0c665f806ab73837964e
+          </a>
+        </div>
+
+        <div class="rounded-xl border border-gray-200/70 dark:border-white/10 p-5 reveal hover-lift bg-white/50 dark:bg-white/5">
+          <h4 class="font-semibold text-lg">Harvard — Computer Science (CS50)</h4>
+          <a class="text-blue-600 hover:underline break-all" href="https://certificates.cs50.io/7a751be1-f7684573-9fa2-e0acccb2e73b.pdf?size=letter" target="_blank" rel="noopener noreferrer">
+            https://certificates.cs50.io/7a751be1-f7684573-9fa2-e0acccb2e73b.pdf?size=letter
+          </a>
+        </div>
+
+        <div class="rounded-xl border border-gray-200/70 dark:border-white/10 p-5 reveal hover-lift bg-white/50 dark:bg-white/5">
+          <h4 class="font-semibold text-lg">Unity — Junior Developer</h4>
+          <a class="text-blue-600 hover:underline break-all" href="https://www.credly.com/badges/fbda9c5b-fac7-4d4b-85c60c332c978c2c/public_url" target="_blank" rel="noopener noreferrer">
+            https://www.credly.com/badges/fbda9c5b-fac7-4d4b-85c60c332c978c2c/public_url
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="container mx-auto py-16 px-4">
+    <div class="bg-white/80 dark:bg-gray-900/60 border border-gray-200/60 dark:border-white/10 shadow-lg rounded-2xl p-6 md:p-8 reveal hover-lift backdrop-blur">
+      <h3 class="text-3xl font-bold mb-6">Contact</h3>
+
+      <div class="grid gap-4 md:grid-cols-2">
+        <div class="rounded-xl border border-gray-200/70 dark:border-white/10 p-5 reveal hover-lift bg-white/50 dark:bg-white/5">
+          <h4 class="font-semibold text-lg">Email</h4>
+          <a class="text-blue-600 hover:underline break-all" href="mailto:metehancetinkaya00@gmail.com">
+            metehancetinkaya00@gmail.com
+          </a>
+        </div>
+
+        <div class="rounded-xl border border-gray-200/70 dark:border-white/10 p-5 reveal hover-lift bg-white/50 dark:bg-white/5">
+          <h4 class="font-semibold text-lg">LinkedIn</h4>
+          <a class="text-blue-600 hover:underline break-all" href="https://www.linkedin.com/in/metehancetinkaya00/" target="_blank" rel="noopener noreferrer">
+            https://www.linkedin.com/in/metehancetinkaya00/
+          </a>
+        </div>
+
+        <div class="rounded-xl border border-gray-200/70 dark:border-white/10 p-5 reveal hover-lift bg-white/50 dark:bg-white/5">
+          <h4 class="font-semibold text-lg">GitHub</h4>
+          <a class="text-blue-600 hover:underline break-all" href="https://github.com/metehancetinkaya00" target="_blank" rel="noopener noreferrer">
+            https://github.com/metehancetinkaya00
+          </a>
+        </div>
+
+        <div class="rounded-xl border border-gray-200/70 dark:border-white/10 p-5 reveal hover-lift bg-white/50 dark:bg-white/5">
+          <h4 class="font-semibold text-lg">Play Store</h4>
+          <a class="text-blue-600 hover:underline break-all" href="https://play.google.com/store/apps/developer?id=DollApp" target="_blank" rel="noopener noreferrer">
+            https://play.google.com/store/apps/developer?id=DollApp
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="py-10 text-center text-gray-500 dark:text-gray-400">
+    © 2026 Metehan Çetinkaya
+  </footer>
+
+  <script>
+    const btn = document.getElementById("themeToggle");
+    btn.addEventListener("click", () => {
+      document.documentElement.classList.toggle("dark");
+      const isDark = document.documentElement.classList.contains("dark");
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+      btn.innerHTML = isDark ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+    });
+
+    (function () {
+      const isDark = document.documentElement.classList.contains("dark");
+      btn.innerHTML = isDark ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+    })();
+
+    window.addEventListener("load", () => {
+      const intro = document.getElementById("intro");
+      if (!intro) return;
+      setTimeout(() => {
+        intro.classList.add("intro-hide");
+        setTimeout(() => intro.remove(), 750);
+      }, 900);
+    });
+
+    const revealEls = document.querySelectorAll(".reveal");
+    if (revealEls.length) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.14 });
+
+      revealEls.forEach((el, idx) => {
+        el.style.transitionDelay = `${Math.min(idx * 40, 240)}ms`;
+        io.observe(el);
+      });
+    }
+
+    (function () {
+      const cards = Array.from(document.querySelectorAll("[data-mediacard]"));
+      cards.forEach((card) => {
+        const tabs = Array.from(card.querySelectorAll(".media-tab"));
+        const panes = Array.from(card.querySelectorAll(".media-pane"));
+
+        function stopVideos() {
+          panes.forEach((p) => {
+            if (p && p.tagName === "VIDEO") {
+              try { p.pause(); } catch (e) {}
+            }
+          });
+        }
+
+        function setMedia(which) {
+          tabs.forEach(t => t.classList.toggle("is-active", t.getAttribute("data-media") === which));
+          panes.forEach((p) => p.classList.toggle("is-active", p.getAttribute("data-pane") === which));
+          if (which !== "vid") stopVideos();
+        }
+
+        tabs.forEach((t) => t.addEventListener("click", () => setMedia(t.getAttribute("data-media"))));
+        setMedia("img");
+      });
+    })();
+
+    document.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-thumb]");
+      if (!b) return;
+      const pane = b.closest("[data-imgpane]");
+      if (!pane) return;
+      const main = pane.querySelector("[data-mainimg]");
+      if (!main) return;
+
+      const all = Array.from(pane.querySelectorAll("[data-thumb]"));
+      all.forEach(x => x.classList.remove("is-active"));
+      b.classList.add("is-active");
+      main.src = b.getAttribute("data-thumb");
+    });
+
+    (function () {
+      const c = document.getElementById("bgFx");
+      const g = c.getContext("2d");
+      const rand = (a, b) => a + Math.random() * (b - a);
+
+      let W = 0, H = 0, dpr = 1;
+      const blobs = [];
+      const sparks = [];
+      const blobCount = 10;
+      const sparkCount = 120;
+
+      function resize() {
+        const rect = c.getBoundingClientRect();
+        dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+        W = Math.floor(rect.width);
+        H = Math.floor(rect.height);
+        c.width = Math.floor(W * dpr);
+        c.height = Math.floor(H * dpr);
+        g.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function init() {
+        blobs.length = 0;
+        sparks.length = 0;
+
+        for (let i = 0; i < blobCount; i++) {
+          blobs.push({
+            x: rand(0, W),
+            y: rand(0, H),
+            r: rand(160, 420),
+            vx: rand(-10, 10),
+            vy: rand(-10, 10),
+            h: rand(190, 330),
+            a: rand(0.06, 0.14)
+          });
+        }
+
+        for (let i = 0; i < sparkCount; i++) {
+          sparks.push({
+            x: rand(0, W),
+            y: rand(0, H),
+            r: rand(0.6, 2.2),
+            s: rand(8, 38),
+            a: rand(0.12, 0.9)
+          });
+        }
+      }
+
+      function draw() {
+        g.clearRect(0, 0, W, H);
+
+        for (let i = 0; i < blobs.length; i++) {
+          const b = blobs[i];
+          b.x += b.vx * 0.016;
+          b.y += b.vy * 0.016;
+          if (b.x < -b.r) b.x = W + b.r;
+          if (b.x > W + b.r) b.x = -b.r;
+          if (b.y < -b.r) b.y = H + b.r;
+          if (b.y > H + b.r) b.y = -b.r;
+
+          const gg = g.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
+          gg.addColorStop(0, `hsla(${b.h} 90% 60% / ${b.a})`);
+          gg.addColorStop(1, "rgba(0,0,0,0)");
+          g.fillStyle = gg;
+          g.beginPath();
+          g.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+          g.fill();
+        }
+
+        g.fillStyle = "rgba(255,255,255,0.9)";
+        for (let i = 0; i < sparks.length; i++) {
+          const s = sparks[i];
+          s.y += s.s * 0.016;
+          if (s.y > H + 4) {
+            s.y = -4;
+            s.x = rand(0, W);
+          }
+          g.globalAlpha = s.a;
+          g.beginPath();
+          g.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          g.fill();
+        }
+        g.globalAlpha = 1;
+
+        requestAnimationFrame(draw);
+      }
+
+      resize();
+      init();
+      requestAnimationFrame(draw);
+      window.addEventListener("resize", () => { resize(); init(); });
+    })();
+  </script>
+</body>
+</html>
